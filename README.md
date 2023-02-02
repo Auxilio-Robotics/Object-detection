@@ -13,5 +13,8 @@ This repository contains code that uses the ultralyitcs package to run a Yolov8 
 
 - Constantly run Yolov8 and ground 2D detections to 3D map environment for remembering object locations.
 
+### Speed:
 
-
+```
+Speed: 0.6ms pre-process, 17.2ms inference, 2.7ms postprocess per image at shape (1, 3, 640, 640)
+```
