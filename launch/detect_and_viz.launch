@@ -1,0 +1,4 @@
+<launch>
+  <node name="object_detection" pkg="yolo" type="object_detection_node.py"/>
+  <node name="viz_object_detections" pkg="yolo" type="visualizer.py"/>
+</launch>
