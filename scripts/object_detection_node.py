@@ -14,43 +14,11 @@ import message_filters
 from rospy.numpy_msg import numpy_msg
 import json
 import base64
-
-
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
-
-
-def json_numpy_obj_hook(dct):
-    """
-    Decodes a previously encoded numpy ndarray
-    with proper shape and dtype
-    :param dct: (dict) json encoded ndarray
-    :return: (ndarray) if input was an encoded ndarray
-    """
-    if isinstance(dct, dict) and '__ndarray__' in dct:
-        data = base64.b64decode(dct['__ndarray__'])
-        return np.frombuffer(data, dct['dtype']).reshape(dct['shape'])
-    return dct
-
-# Overload dump/load to default use this behavior.
-def dumps(*args, **kwargs):
-    kwargs.setdefault('cls', NumpyEncoder)
-    return json.dumps(*args, **kwargs)
-
-def loads(*args, **kwargs):
-    kwargs.setdefault('object_hook', json_numpy_obj_hook)    
-    return json.loads(*args, **kwargs)
-
-def dump(*args, **kwargs):
-    kwargs.setdefault('cls', NumpyEncoder)
-    return json.dump(*args, **kwargs)
-
-def load(*args, **kwargs):
-    kwargs.setdefault('object_hook', json_numpy_obj_hook)
-    return json.load(*args, **kwargs)
 
 
 class ObjectDetectionNode:
@@ -88,18 +56,19 @@ class ObjectDetectionNode:
             'box_classes' : classes.cpu().numpy(),
         }
         
-        self.data_pub.publish(dumps(msg, cls=NumpyEncoder))
-        self.annotated_image_pub(self.cv_bridge.cv2_to_imgmsg(annotated_img))
+        self.data_pub.publish(json.dumps(msg, cls = NumpyEncoder))
+        self.annotated_image_pub.publish(self.cv_bridge.cv2_to_imgmsg(annotated_img))
 
 
     def main(self):
         rospy.init_node('object_detection', anonymous=False)
         rospy.loginfo("Node initialized")
-        self.data_pub = rospy.Publisher('object_bounding_boxes', String, queue_size=60)
-        self.annotated_image_pub = rospy.Publisher('annotated_image_body', Image, queue_size=60)
+        self.data_pub = rospy.Publisher('object_bounding_boxes', String, queue_size=1)
+        self.annotated_image_pub = rospy.Publisher('annotated_image_body', Image, queue_size=1)
+        
         self.rgb_topic_name = '/camera/color/image_raw'
         self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image, )
-        cache = message_filters.Cache(self.rgb_image_subscriber, 10)
+        cache = message_filters.Cache(self.rgb_image_subscriber, 1)
         cache.registerCallback(self.callback)
         rospy.loginfo("Node Ready...")
         # synchronizer = message_filters.TimeSynchronizer([rgb_image_subscriber, self.depth_image_subscriber, self.camera_info_subscriber], 10)
