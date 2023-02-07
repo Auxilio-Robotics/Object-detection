@@ -54,9 +54,9 @@ class ObjectDetectionNode:
             threshcenters = centers[centers > 20]
             if(len(threshcenters) > 0):
                 print(sorted(threshcenters))   
-            xc = (xLow + xHigh) / 2
-            yc = (yLow + yHigh) / 2
-            self.data_pub.publish(json.dumps({'x' : xc, 'y' : yc})) 
+                xc = (xLow + xHigh) / 2
+                yc = (yLow + yHigh) / 2
+                self.data_pub.publish(json.dumps({'x' : xc, 'y' : yc, 'z' : threshcenters[0]})) 
 
 
     def getAnnotations(self, msg):
