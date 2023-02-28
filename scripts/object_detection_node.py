@@ -65,14 +65,11 @@ class ObjectDetectionNode:
         rospy.loginfo("Node initialized")
         self.data_pub = rospy.Publisher('object_bounding_boxes', String, queue_size=1)
         self.annotated_image_pub = rospy.Publisher('annotated_image_body', Image, queue_size=1)
-        
-        self.rgb_topic_name = '/camera/color/image_raw'
-        self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image, )
+        self.cameraInfoSub = message_filters.Subscriber('/camera/depth/camera_info', Image)
+        self.rgb_image_subscriber = message_filters.Subscriber('/camera/color/image_raw', Image, )
         cache = message_filters.Cache(self.rgb_image_subscriber, 1)
         cache.registerCallback(self.callback)
         rospy.loginfo("Node Ready...")
-        # synchronizer = message_filters.TimeSynchronizer([rgb_image_subscriber, self.depth_image_subscriber, self.camera_info_subscriber], 10)
-        # synchronizer.registerCallback(self.image_callback)
         self.cv_bridge = CvBridge()
 
     

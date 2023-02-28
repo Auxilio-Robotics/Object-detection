@@ -70,6 +70,7 @@ class ObjectDetectionNode:
         self.rgb_topic_name = '/camera/aligned_depth_to_color/image_raw'
         self.rgb_image_subscriber = message_filters.Subscriber(self.rgb_topic_name, Image, )
         cache = message_filters.Cache(self.rgb_image_subscriber, 1)
+        
         cache.registerCallback(self.depthImgCallback)
         rospy.loginfo("Node Ready...")
         self.cv_bridge = CvBridge()
